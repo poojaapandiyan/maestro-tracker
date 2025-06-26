@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #EBD6C0;
+      --secondary: #FFF8F2;
+      --accent: #FF7A1F;
+      --text-color: #1A1A1A;
+      --hover-row: #FFF0E3;
+      --button-color: #FF7A1F;
+      --button-hover: #e66900;
+      --table-header-bg: #FFE9D9;
+      --table-border: #ffd1aa;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--secondary);
+      padding: 30px;
+      color: var(--text-color);
+      margin: 0;
+    }
+
+    .navbar {
+      background-color: var(--primary);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 0 0 8px 8px;
+      margin: -30px -30px 30px -30px;
+    }
+
+    .nav-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      height: 40px;
+      width: auto;
+    }
+
+    .nav-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: var(--text-color);
+    }
+
+    h2, h3 {
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--table-border);
+    }
+
+    th {
+      background-color: var(--table-header-bg);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--hover-row);
+    }
+
+    tr:hover {
+      background-color: var(--primary);
+      color: white;
+      transition: 0.3s ease;
+    }
+
+    button {
+      background-color: var(--button-color);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-right: 6px;
+    }
+
+    button:hover {
+      background-color: var(--button-hover);
+    }
+
+    .btn-approve {
+      background-color: #4CAF50;
+    }
+
+    .btn-reject {
+      background-color: #f44336;
+    }
+
+    .download-section {
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    #excelModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--secondary);
+      padding: 30px 10px 40px 10px;
+      z-index: 1000;
+      width: 90%;
+      max-width: 1000px;
+      border-radius: 12px;
+      border: 1px solid var(--table-border);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+      font-family: 'Segoe UI', sans-serif;
+    }
+    #rejectModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--secondary);
+      padding: 30px 30px 40px 10px;
+      z-index: 1000;
+      width: 90%;
+      max-width: 800px;
+      border-radius: 12px;
+      border: 1px solid var(--table-border);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    #rejectModal h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    #rejectModal textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 1rem;
+      line-height: 1.4;
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      resize: vertical;
+      background-color: #fff;
+      color: var(--text-color);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+
+    #rejectModal button {
+      margin-left: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-content {
+        gap: 10px;
+      }
+
+      .nav-title {
+        font-size: 1.2em;
+      }
+
+      table, th, td {
+        font-size: 0.9em;
+      }
+
+      .download-section {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-content">
+    <img src="logo.jpeg" alt="Logo" class="logo" />
+    <span class="nav-title">Maestrominds</span>
+  </div>
+</nav>
+
+<h2>Admin Maestro Track</h2>
+
+<table id="admin-table">
+  <thead>
+    <tr>
+      <th>Email ID</th>
+      <th>Date</th>
+      <th>Work</th>
+      <th>Worked Hours</th>
+      <th>Projects Pending</th>
+      <th>Work Status</th>
+      <th>Action / Status</th>
+    </tr>
+  </thead>
+  <tbody id="admin-body"></tbody>
+</table>
+
+<div class="download-section">
+  <button onclick="downloadExcel()">Download Excel</button>
+  <button onclick="viewExcel()">Preview Excel</button>
+</div>
+
+<div id="excelModal">
+  <h3>Excel Data Preview</h3>
+  <table id="excelTable">
+    <thead>
+      <tr>
+        <th>Email ID</th>
+        <th>Date</th>
+        <th>Work</th>
+        <th>Worked Hours</th>
+        <th>Projects Pending</th>
+        <th>Work Status</th>
+        <th>Approval</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div style="text-align:right; margin-top:10px;">
+    <button onclick="closeExcel()">Close</button>
+  </div>
+</div>
+
+<div id="rejectModal">
+  <h3>Enter Rejection Reason</h3>
+  <textarea id="rejectReason" placeholder="Please mention the reason clearly..."></textarea>
+  <div style="text-align:right;">
+    <button onclick="confirmReject()">Submit</button>
+    <button onclick="closeRejectModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  let backendData = [];
+  let rejectId = "";
+
+  async function loadData() {
+    try {
+      const res = await fetch("/api/data");
+      backendData = await res.json();
+      renderTable(backendData);
+    } catch (err) {
+      alert("❌ Failed to fetch data");
+      console.error(err);
+    }
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById("admin-body");
+    tbody.innerHTML = "";
+    data.forEach(d => {
+      const tr = document.createElement("tr");
+      const buttons = `
+        <button class="btn-approve" onclick="updateApproval('${d._id}', 'Approved')">Approve</button>
+        <button class="btn-reject" onclick="openRejectModal('${d._id}')">Reject</button>
+      `;
+      tr.innerHTML = `
+        <td>${d.email || 'N/A'}</td>
+        <td>${d.date}</td>
+        <td>${d.work}</td>
+        <td>${d.hours}</td>
+        <td>${d.pending}</td>
+        <td>${d.status}</td>
+        <td>
+          ${d.approval === "Pending" ? buttons : `<strong>${d.approval}${d.reason ? ` - ${d.reason}` : ''}</strong>`}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+ async function updateApproval(compoundId, value, reason = "") {
+  const [email, index] = compoundId.split("_"); // Split _id into email and index
+
+  try {
+    await fetch(`/api/data/${email}/${index}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ approval: value, reason })
+    });
+
+    alert(`✅ Marked as ${value}`);
+    document.getElementById("rejectReason").value = "";
+    loadData(); // Refresh table
+  } catch (err) {
+    alert("❌ Failed to update approval");
+    console.error(err);
+  }
+}
+
+
+  function openRejectModal(id) {
+    rejectId = id;
+    document.getElementById("rejectModal").style.display = "block";
+  }
+
+  function closeRejectModal() {
+    rejectId = "";
+    document.getElementById("rejectModal").style.display = "none";
+    document.getElementById("rejectReason").value = "";
+  }
+
+  function confirmReject() {
+    const reason = document.getElementById("rejectReason").value.trim();
+    if (!reason) {
+      alert("Please enter a reason for rejection.");
+      return;
+    }
+    updateApproval(rejectId, "Rejected", reason);
+    closeRejectModal();
+  }
+
+  function downloadExcel() {
+    const exportData = backendData.map(d => ({
+      "Email ID": d.email || 'N/A',
+      Date: d.date,
+      Work: d.work,
+      "Worked Hours": d.hours,
+      "Projects Pending": d.pending,
+      "Work Status": d.status,
+      Approval: d.approval + (d.reason ? ` - ${d.reason}` : "")
+    }));
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Admin Review");
+    XLSX.writeFile(wb, "admin_review.xlsx");
+  }
+
+  function viewExcel() {
+    const tbody = document.querySelector("#excelTable tbody");
+    tbody.innerHTML = "";
+    backendData.forEach(d => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${d.email || 'N/A'}</td>
+        <td>${d.date}</td>
+        <td>${d.work}</td>
+        <td>${d.hours}</td>
+        <td>${d.pending}</td>
+        <td>${d.status}</td>
+        <td>${d.approval}${d.reason ? ` - ${d.reason}` : ''}</td>
+      `;
+      tbody.appendChild(row);
+    });
+    document.getElementById("excelModal").style.display = "block";
+  }
+
+  function closeExcel() {
+    document.getElementById("excelModal").style.display = "none";
+  }
+
+  loadData();
+</script>
+
+</body>
+</html>
