@@ -5,7 +5,7 @@ The system provides separate dashboards for employees and administrators to ensu
 
 ---
 
-## 🚀 Features
+##  Features
 
 - Employee work log submission
 - Admin approval and rejection system
@@ -17,7 +17,7 @@ The system provides separate dashboards for employees and administrators to ensu
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 **Frontend**
 - HTML
